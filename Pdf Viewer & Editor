@@ -102,45 +102,73 @@ class PDFReader(tk.Frame):
         options_label = Label(edit_window,text="Select an editing option:")
         options_label.pack()
         option_listbox = Listbox(edit_window,height=5)
-        option_listbox.insert(1, "PDF to Word")
+        option_listbox.insert(1, "Convert to")
         option_listbox.insert(2, "Split PDF")
         option_listbox.insert(3, "Merge PDF")
         option_listbox.insert(4, "Extract one page")
         option_listbox.insert(5, "Extract all pages")
-        option_listbox.insert(6, "Rotate PDF")
         option_listbox.pack()
-
-    # Inserting Options of editing to Editing list
-
         def select_option():
             option = option_listbox.curselection()
             if option == (0,):
-                self.pdf_to_word()
+                self.Conventor()
             elif option == (1,):
                 self.split_pdf()
             elif option == (2,):
                 self.merge()
             elif option == (3,):
                 self.extract_one_page()
-            elif option == (5,):
+            elif option == (4,):
                 self.extract_all()
-            elif option == (6,):
-                self.rotate_pdf()
             else:
                 pass
         select_button = Button(edit_window, text="Select", command=select_option)
         select_button.pack()
-
-    # Convert Selected PDF file to a Word file
-        
+    def Conventor(self):
+        Convertor_window = Toplevel(self.master)
+        Convertor_window.geometry('300x300')
+        Convertor_window.title('Conventor To')
+        Convertor_window.resizable(False, False)
+        options_label = Label(Convertor_window,text="Select an Converting option:")
+        options_label.pack()
+        option_listbox = Listbox( Convertor_window,height=5)
+        option_listbox.insert(1, " Word")
+        option_listbox.insert(2, "Png")
+        option_listbox.insert(3, "Jpeg")
+        option_listbox.insert(4, "ppt")
+        option_listbox.pack()
+        def select_option():
+            option = option_listbox.curselection()
+            if option ==(0,):
+                self.pdf_to_word()
+            elif option == (1,):
+                self.pdf_to_png()
+            elif option == (2,):
+                self.pdf_to_jpeg()
+            elif option == (3,):
+                self.pdf_to_ppt()
+            else:
+                pass
+        select_button = Button(Convertor_window, text="Select", command=select_option)
+        select_button.pack()
     def pdf_to_word(self):
         doc = aw.Document(self.file_path)
         docx_path = os.path.join(os.path.dirname(self.file_path), f"Word version of {os.path.basename(self.file_path)}.docx")
         doc.save(docx_path, aw.SaveFormat.DOCX)
         os.startfile(docx_path)
-
-    # Opens a Window to choose range of Pages
-
+    def pdf_to_png(self):
+        doc = aw.Document(self.file_path)
+        docx_path = os.path.join(os.path.dirname(self.file_path), f"Png version of {os.path.basename(self.file_path)}.Png")
+        doc.save(docx_path, aw.SaveFormat.PNG)
+        os.startfile(docx_path)
+    def pdf_to_jpeg(self):
+        doc = aw.Document(self.file_path)
+        docx_path = os.path.join(os.path.dirname(self.file_path), f"jpeg version of {os.path.basename(self.file_path)}.Jpeg")
+        doc.save(docx_path, aw.SaveFormat.JPEG)
+    def pdf_to_ppt(self):
+        presentation = os.path.join(os.path.dirname(self.file_path), f"presentation version of {os.path.basename(self.file_path)}.pptx")
+        pdf2pptx.convert_pdf2pptx(self.file_path, presentation , 300, 0, None, False)
+        os.startfile(presentation)
     def split_pdf(self):
         split_window = Toplevel(self.master)
         split_window.geometry('300x300')
@@ -156,9 +184,6 @@ class PDFReader(tk.Frame):
         end_entry.pack()
         split_button = Button(split_window, text="Split", command=lambda: self.split(start_entry.get(), end_entry.get()))
         split_button.pack()
-
-    # Saves new PDF file with the selected pages
-
     def split(self,start_entry,end_entry):
         try:
             start = int(start_entry)
@@ -174,9 +199,6 @@ class PDFReader(tk.Frame):
         except ValueError:
             messagebox.showerror("Error", "Please enter a number")
             pass
-
-    # Opens a Window to Choose one page from PDF file
-
     def extract_one_page(self):
         extract_window = Toplevel(self.master)
         extract_window.geometry('300x300')
@@ -188,67 +210,21 @@ class PDFReader(tk.Frame):
         page_entry.pack()
         extract_button = Button(extract_window, text="Extract", command=lambda: self.extract(page_entry.get()))
         extract_button.pack()
-
-    # Takes input from user and Saves a new PDF file with the selected page
-
     def extract(self,page_entry):
-        try:
-            page = int(page_entry)
-            doc = aw.Document(self.file_path)
-            extracted = doc.extract_pages(page,page)
-            extracted.save("Page"+f"[{page}].pdf", aw.SaveFormat.PDF)
-            os.startfile("Page"+f"[{page}].pdf")
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a number")
-
-    # Extracts Each page of PDF file and saves it in a Seperate PDF files (NOT WORKING)
-
-    def extract_all(self):
-     reader = PyPDF2.PdfReader(self.file_path)
-     num_pages = reader.getNumPages()
-     for i in range(num_pages):
-        self.extract(str(i+1))
+        page = int(page_entry)
         doc = aw.Document(self.file_path)
-        extracted = doc.extract_pages(0,i)
-        extracted.save("Page"+f"{0:i}.pdf",aw.SaveFormat.PDF)
-
-           
-
-    # Rotates every page in pdf from portrait to Landscape and vice versa (NOT WORKING and need MODIFICATION)
-
-    def rotate_pdf(self):
-     rotate_window = Toplevel(self.master)
-     rotate_window.geometry('300x300')
-     rotate_window.title('Rotate')
-     rotate_window.resizable(False, False)
-     angle_label = Label(rotate_window, text="Angle")
-     angle_label.pack()
-     angle_entry = Entry(rotate_window)
-     angle_entry.pack()
-     rotate_button = Button(rotate_window, text="Rotate", command=lambda: self.rotate(angle_entry.get()))
-     rotate_button.pack()
-
-    def rotate(self, angle_text):
+        extracted = doc.extract_pages(page,page)
+        extracted.save("Page"+f"[{page}].pdf", aw.SaveFormat.PDF)
+        os.startfile("Page"+f"[{page}].pdf")
+    def extract_all(self):
         try:
-            angle = int(angle_text)
-            reader = PyPDF2.PdfReader(self.file_path)
-            writer = PyPDF2.PdfWriter()
-         
-            for pagenum in range(reader.numPages):
-                page = reader.getPage(pagenum)
-                page.rotateClockwise(angle)
-                writer.addPage(page)
-         
-            rotated_file = "Rotated_file.pdf"
-            with open(rotated_file, 'wb') as f:
-                writer.write(f)
-         
-            os.startfile(rotated_file)
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a number")
-
-    # Opens a window to select the second PDF file
-
+            doc = aw.Document(self.file_path)
+            for page in range(1, doc.page_count + 1):
+                extracted = doc.extract_pages(page, page + 1)
+                extracted.save(f"Page[{page}].pdf", aw.SaveFormat.PDF)
+            messagebox.showinfo("Extraction Complete", "All pages have been extracted successfully.")
+        except Exception as e:
+           messagebox.showerror("Extraction Error", f"An error occurred during extraction: {str(e)}")
     def merge_pdf(self):
         merge_window = Toplevel(self.master)
         merge_window.geometry('300x300')
@@ -260,38 +236,17 @@ class PDFReader(tk.Frame):
         file_button.pack()
         merge_button = Button(merge_window, text="Merge", command=self.merge)
         merge_button.pack()
-
-    def select_and_merge(self):
-        file_path = filedialog.askopenfilename(title="Select file", filetypes=(("pdf files", "*.pdf"), ("all files", "*.*")))
-        if file_path:
-            self.second_pdf_file = file_path
-        else:
-            pass
-
     def merge(self):
-        try:
-            first_pdf = PyPDF2.PdfReader(self.file_path)
-            second_pdf_file = filedialog.askopenfilename(title="Select file", filetypes=(("pdf files", "*.pdf"), ("all files", "*.*")))
-            second_pdf = PyPDF2.PdfReader(self.second_pdf_file)
-            writer = PyPDF2.PdfWriter()
-
-            for pagenum in range(first_pdf.getNumPages()):
-                page = first_pdf.getPage(pagenum)
-                writer.addPage(page)
-
-            for pagenum in range(second_pdf.getNumPages()):
-                page = second_pdf.getPage(pagenum)
-                writer.addPage(page)
-
-            merged_file = "Merged_file.pdf"
-            with open(merged_file, 'wb') as f:
-                writer.write(f)
-         
-            os.startfile(merged_file)
-        except FileNotFoundError:
-            messagebox.showerror("Error", "Please select a PDF file")
-
-       
+        file_path2 = filedialog.askopenfilename(title="Select file", filetypes=(("pdf files", "*.pdf"), ("all files", "*.*")))
+        files_list = [self.file_path]
+        files_list.append(file_path2)
+        output = aw.Document()
+        output.remove_all_children()
+        for fileName in files_list:
+            input = aw.Document(fileName)
+            output.append_document(input, aw.ImportFormatMode.KEEP_SOURCE_FORMATTING)
+        output.save("merged.pdf")
+        os.startfile("merged.pdf")
 root = tk.Tk()
 app = PDFReader(master=root)
 app.mainloop()
